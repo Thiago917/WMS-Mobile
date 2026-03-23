@@ -9,14 +9,14 @@ import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpaci
 export default function Home() {
 
   const [data, setData] = useState<any[]>([]);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState<string>('');
+  const [page, setPage] = useState<number>(1);
   const [refreshing, setRefreshing] = useState(false);
   
   const inputRef = useRef<TextInput | null>(null);
 
   const itemsPerPage = 5;
-  const api_url = `${process.env.EXPO_PUBLIC_API_LIST}`;
+  const api_url = `https://tsgodev.tsapp.com.br/api/shipment/listApp`;
 
   useEffect(() => {
     NavigationBar.setVisibilityAsync('hidden')
@@ -24,7 +24,7 @@ export default function Home() {
   
     loadData();
   }, []);
-
+  
   const loadData = async () => {
     try{
       await axios.post(api_url).then((response) => {

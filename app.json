@@ -4,7 +4,7 @@
     "slug": "Biper",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/ts-scanner-appIcon.png",
+    "icon": "./assets/images/TS.png",
     "scheme": "tsshara",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,13 +14,91 @@
     "android": {
       "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
-        "backgroundColor": "#fff",
-        "foregroundImage": "./assets/images/foreground.png",
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/images/TS.png",
         "backgroundImage": "./assets/images/app-icon-background.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "intentFilter": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "tsshara",
+              "host": "bip"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "tsshara",
+              "host": "bip"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "tsshara",
+              "host": "bip"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "tsshara",
+              "host": "bip"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "tsshara",
+              "host": "bip"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "tsshara",
+              "host": "bip"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
         {
           "action": "VIEW",
           "data": [
@@ -59,7 +137,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/TS.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -76,8 +154,14 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "f6e0aacf-aaa5-4385-9a28-cfae0b70ec90"
+        "projectId": "47342b13-5c85-412f-aa05-a06c4dd07b0a"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/47342b13-5c85-412f-aa05-a06c4dd07b0a"
     }
   }
 }

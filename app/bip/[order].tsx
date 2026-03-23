@@ -9,37 +9,52 @@ export default function Bip() {
   const router = useRouter();
   const inputRef = useRef<TextInput | null>(null);
 
-  const { order, amount } = useLocalSearchParams<{ order: string; amount: string }>();
+  const { order} = useLocalSearchParams<{ order: string; }>();
+  // var { amount } = useLocalSearchParams<{ amount: string; }>();
 
   const [ns, setNs] = useState<Record<string, string>>({});
   const [items, setItems] = useState<any[]>([]);
   const [serials, setSerials] = useState<any[]>([]);
   const [eans, setEans] = useState<any[]>([]);
-  const [orderID, setOrderID] = useState('');
-  const [inputValue, setInputValue] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [orderID, setOrderID] = useState<string>('');
+  const [inputValue, setInputValue] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const [bipedAmount, setBipedAmount] = useState(false)
   const [split, setSplit] = useState(true);
+  const [countAmount, setCountAmount] = useState<number>(0);
 
-  const api_url = `${process.env.EXPO_PUBLIC_API_SEPARATION}/${order}`;
+  const api_url = `https://tsgodev.tsapp.com.br/api/shipment/separation-details/${order}`;
   
   useEffect(() => {
     loadData()
   }, []);
 
   useEffect(() => {
-    const bipped = Object.values(ns).map(item => item.split(',')).flat().length + serials.map((item) => item.serial_number).length
-    if(bipped > 0 && Number(amount) === Number(bipped)) setBipedAmount(true)
+    const ns_registered = serials.map((item) => item.serial_number);
+    const bipped = Object.values(ns).map(item => item.split(',')).flat().length + ns_registered.length
+    
+    if(bipped > 0 && Number(countAmount) === Number(bipped)){
+      setSplit(false)
+      setBipedAmount(true)
+    } 
+
   }, [ns])
 
   const loadData = async ()  => {
       
     try{
       axios.post(api_url).then((response) => {
-        setItems(response.data.response.items)
-        setOrderID(response.data.response.id)
-        setSerials(response.data.ns)
-        setEans(items.map((item) => item.code))
+        const itemsFromApi = response.data.response.items;
+
+        setItems(itemsFromApi);
+        setOrderID(response.data.response.id);
+        setSerials(response.data.ns);
+        setEans(itemsFromApi.map((item : any) => item.code));
+        const total = itemsFromApi.reduce(
+          (sum: number, item: any) => sum + Number(item.quantity),
+          0
+        );
+        setCountAmount(total)
       })
     }
     catch(err){
@@ -91,23 +106,39 @@ export default function Bip() {
       product_id: item.product_id,
       quantity: Number(item.quantity),
       separated: Number(item.separated),
+      ean: item.code.ean_dv
     }));
 
-    var checkProd = ''
-    text.slice(0, 3) === '789' ? checkProd = text.slice(8, 12) : checkProd = text.slice(5, 9)
+    let checkProd = '';
 
-    const product = codes.find((item) => item.product_code === checkProd);
+    if (text.startsWith('789')) {
+      const found = codes.find(item => String(item.ean) === text);
+      checkProd = found ? found.product_code : '';
+    } else {
+      checkProd = text.slice(5, 9);
+    }
+
+    var product = codes.find((item) => item.product_code === checkProd || text === item.ean);
     const find_duplicate = ns_rec.find((item) => item === text)
-    const find_eans = eans.find((item) => item.ean_dv === String(text))
+    const find_eans = eans.find((item) => String(item.ean_dv)  === String(text))
 
-    if (!product) {
+    if (!product && checkProd.endsWith('0')) {
+      
+      var checkVal = `0${checkProd.slice(0, 3)}`
+      product = codes.find((item) => item.product_code === checkVal || text === item.ean);
+      if(product){
+        checkProd = checkVal
+      }
+    }
+
+    if(!product){
       Alert.alert('Erro', `Você bipou o produto errado: ${checkProd}! Produto ${checkProd} Não existe no pedido`, [{
         text: 'Ok',
         onPress: () => inputRef.current?.focus()
       }])
       return;
     }
-
+    
     const { product_id, quantity, separated } = product;
 
     if(text.slice(0, 3) === '789'){
@@ -144,7 +175,7 @@ export default function Bip() {
       }
 
       if(separated >= quantity){
-        Alert.alert('Aviso',`O item ${checkProd} já está 100% separado!`, [{
+        Alert.alert('Aviso',`Bipando o item ${checkProd} a mais do que o necessário!`, [{
           text: 'Ok',
           onPress: () => inputRef.current?.focus()
         }]);
@@ -188,15 +219,13 @@ export default function Bip() {
       }])
       return;
     }
-      
-    var data = {
-      order: orderID,
-      barcodes: Object.values(ns).map(item => item.split(',')).flat() 
-    }
 
     const api_url = 'https://tsgodev.tsapp.com.br/api/shipment/ns-register';
     try{
-      axios.post(api_url, data).then((response) => {
+      axios.post(api_url, {
+        'order': orderID,
+        'barcodes': Object.values(ns).map(item => item.split(',')).flat() 
+      }).then((response) => {
         const res = response.data;
         if(res.response_id == '2'){
           setLoading(false)
@@ -232,7 +261,7 @@ export default function Bip() {
     Alert.alert('Confirmação', 'Confirma que o pedido é parcial?', [{
       text: 'SIM',
       onPress: (() => {
-        setBipedAmount(!bipedAmount)
+        setBipedAmount(true)
         setSplit(false)
       })
     },{
@@ -285,7 +314,6 @@ export default function Bip() {
         value={inputValue}
         placeholder='Serial'
         showSoftInputOnFocus={false}
-        // onBlur={() => inputRef.current?.focus()}
         onBlur={() => {
           setTimeout(() => {
             inputRef.current?.focus();
@@ -295,7 +323,7 @@ export default function Bip() {
 
       />
       <Text style={styles.h1}>
-           APONTAMENTO: <Text style={{ color: '#0abb87' }}>#{order}</Text>
+           APONTAMENTO: <Text style={{ color: '#0abb87' }}>#{order}  </Text>({countAmount})
       </Text>
       {split ? (
       <TouchableOpacity style={styles.splitButton} onPress={splitOrder}>
