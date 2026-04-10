@@ -4,13 +4,16 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
+
+const api_url = process.env.EXPO_PUBLIC_API_URL
+
+
 export default function Bip() {
 
   const router = useRouter();
   const inputRef = useRef<TextInput | null>(null);
 
   const { order} = useLocalSearchParams<{ order: string; }>();
-  // var { amount } = useLocalSearchParams<{ amount: string; }>();
 
   const [ns, setNs] = useState<Record<string, string>>({});
   const [items, setItems] = useState<any[]>([]);
@@ -23,7 +26,6 @@ export default function Bip() {
   const [split, setSplit] = useState(true);
   const [countAmount, setCountAmount] = useState<number>(0);
 
-  const api_url = `https://tsgodev.tsapp.com.br/api/shipment/separation-details/${order}`;
   
   useEffect(() => {
     loadData()
@@ -43,7 +45,7 @@ export default function Bip() {
   const loadData = async ()  => {
       
     try{
-      axios.post(api_url).then((response) => {
+      axios.post(`${api_url}/shipment/separation-details/${order}`).then((response) => {
         const itemsFromApi = response.data.response.items;
 
         setItems(itemsFromApi);
@@ -220,9 +222,8 @@ export default function Bip() {
       return;
     }
 
-    const api_url = 'https://tsgodev.tsapp.com.br/api/shipment/ns-register';
     try{
-      axios.post(api_url, {
+      axios.post(`${api_url}/shipment/ns-register`, {
         'order': orderID,
         'barcodes': Object.values(ns).map(item => item.split(',')).flat() 
       }).then((response) => {
@@ -235,7 +236,7 @@ export default function Bip() {
           }]);
           
           setTimeout(() => {
-            router.replace('/')
+            router.replace('/shipment')
           }, 1500)
       }
       else{
@@ -244,7 +245,7 @@ export default function Bip() {
           text: 'Ok',
           onPress: () => inputRef.current?.focus()
         }]);
-        router.replace(`/bip/${order}`)
+        router.replace(`/shipment/bip/${order}`)
       }
     })
     }
@@ -323,7 +324,7 @@ export default function Bip() {
 
       />
       <Text style={styles.h1}>
-           APONTAMENTO: <Text style={{ color: '#0abb87' }}>#{order}  </Text>({countAmount})
+           SEPARAÇÃO: <Text style={{ color: '#0abb87' }}>#{order}  </Text>({countAmount})
       </Text>
       {split ? (
       <TouchableOpacity style={styles.splitButton} onPress={splitOrder}>

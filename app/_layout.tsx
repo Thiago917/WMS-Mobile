@@ -1,16 +1,15 @@
 import { Stack } from "expo-router";
 
 import '@/global.css';
+import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {
-  return <Stack screenOptions={{
-    title: 'TS Go',
-      headerTintColor: 'ghostwhite',
-      headerTitleStyle: {
-        fontWeight: 'bold',
-      },
-      headerStyle:{
-      backgroundColor: '#1a1a27',
-    }
-  }}/>;
+  return (
+    <Stack screenOptions={{headerShown: false}}>
+      <StatusBar style="light" />
+      <Stack.Screen name='index'/>    
+      <Stack.Screen name='login'/>    
+    </Stack>
+  )
+  
 }
